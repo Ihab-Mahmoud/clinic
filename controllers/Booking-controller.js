@@ -17,13 +17,13 @@ export const createBooking = async (req, res) => {
     { isBooked: true },
     { new: true }
   );
-  console.log(slot.doctorId.toString());
 
   if (!slot) {
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ message: "Slot already booked or not found" });
   }
+  console.log(slot.doctorId.toString());
   
   // Now create booking
   const doctorId =
@@ -104,31 +104,26 @@ export const deleteBooking = async (req, res, next) => {
     const { id } = req.params;
     const { userId } = req.user;
 
-    // 1. جيب الموعد
     const appointment = await Booking.findOne({_id:id,userId:userId}).populate("slotId");
     if (!appointment) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: "appointment does not exit" });
     }
 
-    // 2. احسب الفرق بين دلوقتي ووقت الموعد
     const now = new Date();
     const appointmentTime = new Date(appointment?.slotId?.startTime);
     
     
     const diffHours = (appointmentTime - now) / (1000 * 60 * 60); // بالساعة
     
-    // 3. تحقق من 24 ساعة
     if (diffHours < 24) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         message:"Appointments cannot be cancelled less than 24 hours in advance.",
       });
     }
 
-    // 4. حدث الحالة إلى ملغي
     appointment.status = Booking_STATUS.CANCELLED;
     await appointment.save();
 
-      // 5. اجعل الـ slot غير محجوز
   if (appointment.slotId) {
     await TimeSlot.findByIdAndUpdate(appointment.slotId._id, { isBooked: false });
   }
@@ -136,10 +131,9 @@ export const deleteBooking = async (req, res, next) => {
   let updatedUser;
 if (appointment.userId) {
    updatedUser= await User.findOneAndUpdate(
-    { _id: appointment.userId },          // شرط البحث (المستخدم)
-    { $inc: { paidSessions: 1 } },        // تزود جلسة واحدة
-    { new: true, runValidators: true }    // يرجّع القيمة الجديدة
-  );
+    { _id: appointment.userId },          
+    { $inc: { paidSessions: 1 } },   
+    { new: true, runValidators: true }    )
 }
 
   const appointmentDate = new Date(appointment?.slotId?.date).toLocaleDateString("ar-EG", {
