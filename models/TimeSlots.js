@@ -5,7 +5,6 @@ const TimeSlotShcema = new mongoose.Schema(
     date: Date,
     startTime: {
       type: Date,
-      unique: true,
     },
     doctorId: {
         type: mongoose.Types.ObjectId,
@@ -13,7 +12,6 @@ const TimeSlotShcema = new mongoose.Schema(
       },
     endTime: {
       type: Date,
-      unique: true,
     },
     isBooked: Boolean,
   },

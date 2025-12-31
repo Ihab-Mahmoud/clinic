@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import TimeSlot from "../models/TimeSlots.js";
+import mongoose from "mongoose";
 
 
 export const getAllSlots = async (req, res, next) => {
@@ -76,12 +77,13 @@ export const createSlot = async (req, res, next) => {
   while (current.getTime() + intervalMinutes * 120000 <= end) {
     const slotStart = new Date(current);
     const slotEnd = new Date(current.getTime() + intervalMinutes * 120000);
-    const overlapping = await TimeSlot.findOne({
-      doctorId,
-      startTime: { $lt: slotEnd },
-      endTime: { $gt: slotStart },
-    });
+  
 
+const overlapping = await TimeSlot.findOne({
+  doctorId: doctorId,
+  startTime: { $lt: slotEnd },
+  endTime: { $gt: slotStart },
+});
     if (overlapping) {
       console.log("64532");
       
